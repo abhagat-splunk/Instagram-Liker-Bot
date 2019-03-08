@@ -65,6 +65,11 @@ const instagrambot = {
                 waitUntil: 'networkidle2'
             });
             await instagrambot.page.waitFor(1000);
+            await autoScroll(instagrambot.page);
+            await instagrambot.page.evaluate(_ => {
+                window.scrollTo(0, 0);
+            });
+            await instagrambot.page.waitFor(30000);
             let posts = await instagrambot.page.$$('article > div:nth-child(1) > div:nth-child(1) img[decoding="auto"]')
             for (let post of posts) {
                 await post.click();
@@ -88,5 +93,24 @@ const instagrambot = {
 
     }
 };
+
+async function autoScroll(page) {
+    await page.evaluate(async () => {
+        await new Promise((resolve, reject) => {
+            var totalHeight = 0;
+            var distance = 100;
+            var timer = setInterval(() => {
+                var scrollHeight = document.body.scrollHeight;
+                window.scrollBy(0, distance);
+                totalHeight += distance;
+
+                if (totalHeight >= scrollHeight) {
+                    clearInterval(timer);
+                    resolve();
+                }
+            }, 100);
+        });
+    });
+}
 
 module.exports = instagrambot;
